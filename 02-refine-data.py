@@ -1,5 +1,6 @@
 import pandas as pd
 import random
+import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -26,28 +27,23 @@ df.to_csv('./dataset/sample.csv', index=False)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # refine & save using OpenAI API in batches
-batch_size = 20
+# Process each item individually
 r = open('./dataset/refined.txt', 'w')
-    
-for i in range(0, len(df), batch_size):
-    # get the batch of product names
-    batch = df.iloc[i:i+batch_size]['product_title'].tolist()
-    batch_prompt = prompt + "\n".join(batch)
+
+for i, item in enumerate(df['product_title']):
+    item_prompt = prompt + item
     
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": batch_prompt}]
+        messages=[{"role": "user", "content": item_prompt}]
     )
     
-    # parse, print, and write the response
-    refined_products = response.choices[0].message.content.strip().split('\n')
+    refined_product = response.choices[0].message.content.strip()
     
-    # write the refined products to the file
-    for refined in refined_products:
-        if refined != "":
-            r.write(refined + "\n")
-            
-    r.flush()
+    if refined_product != "":
+        r.write(refined_product + "\n")
+        r.flush()
     
-    print(f"refined batch {i//batch_size + 1}/{len(df)//batch_size + 1}: {refined_products}")
-                
+    print(f"refined item {i+1}/{len(df)}: {refined_product}")
+
+r.close()

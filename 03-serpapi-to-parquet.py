@@ -1,5 +1,6 @@
 import pandas as pd
 from serpapi import GoogleSearch
+import os
 import json
 import time
 from dotenv import load_dotenv
