@@ -1,0 +1,5 @@
+.env
+dataset/*
+!dataset/.gitkeep
+.DS_Store
+venv/
