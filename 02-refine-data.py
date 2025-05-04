@@ -7,14 +7,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 prompt = """
-You are a product name refinement assistant. Your job is to refine product names to be clear, structured, and very simple, and only output the name of the product with no formatting or extra text.
-
-Refine the following product names, and remove unnecessary words/formatting/brands. Return with just newlines between each product name:
+You are an e-commerce search expert. 
+Input: A seed product query (e.g., "Nike shoes").
+Task: Produce 3 varied, realistic search queries by adding 1-3 shopping attributes. 
+• Do NOT change the brand or core product type.
+• Attributes can include color, material, price filter, style, size, discount, etc.
+• Keep language concise and natural.
+• Avoid gender or cultural bias.
+Return plain text with just the query, no numbering, explanations.
+Seed query:
 """
 
-# select 10k random product names
+# select 10k random english product names
 df = pd.read_parquet('./dataset/shopping_queries_dataset_products.parquet')
-# filter out the product names that are not in English
 df = df[df['product_locale'] == 'us']
 
 # select 10k random rows
@@ -35,10 +40,12 @@ for i, item in enumerate(df['product_title']):
     
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": item_prompt}]
+        messages=[{"role": "user", "content": item_prompt}], 
+        max_tokens=100,
+        temperature=0.7,
     )
     
-    refined_product = response.choices[0].message.content.strip()
+    refined_product = response.choices[0].message.content.strip().replace("\n\n", "\n") # remove whitespae/excessive newlines
     
     if refined_product != "":
         r.write(refined_product + "\n")

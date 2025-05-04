@@ -1,7 +1,5 @@
 import pandas as pd
-from dotenv import load_dotenv
 
-load_dotenv()
 # create the combined dataset with all the parquet files
 
 # read the 5 parquet files
